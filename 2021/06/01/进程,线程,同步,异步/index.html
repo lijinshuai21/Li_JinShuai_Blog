@@ -1,0 +1,145 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="李金帅"><meta name="renderer" content="webkit"><meta name="copyright" content="李金帅"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>进程 线程 同步 异步 · Mr.Li's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/LJS_Blog/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/LJS_Blog/img/assets/portrait.jpg"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">李金帅</div><div class="profile-signature">能将喜欢的东西留在身边，这就是我努力的意义。</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a>Mr.LiJinShuai's Blog</a></div><div class="intro-nav-label-box"><a href="/">首页</a><a href="/about/">关于</a><a href="/archives/">归档</a><a href="/tags/">标签</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">首页</a><a href="/about/">关于</a><a href="/archives/">归档</a><a href="/tags/">标签</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">进程 线程 同步 异步</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-06</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="JS"> JS</a></span></div><div class="post-intro-read"><span> Word count: <span class="post-count">1.3k</span> | Reading time: <span class="post-count">4</span>min</span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><h1 id="进程-线程-同步-异步"><a href="#进程-线程-同步-异步" class="headerlink" title="进程 线程 同步 异步"></a>进程 线程 同步 异步</h1><h2 id="1-进程与线程"><a href="#1-进程与线程" class="headerlink" title="1.进程与线程"></a>1.进程与线程</h2><ul>
+<li><p>进程是一个动态的过程，是一个活动的实体。简单来说一个应用程序的运算就可以被看做一个进程。</p>
+</li>
+<li><p>线程是运行中的实际的任务执行者，可以说进程中包含多个可以同时运行的线程。</p>
+</li>
+<li><p>JavaScript语言的一大特点就是<strong>单线程</strong>也就是说同一个时间只能做一件事。（为什么JS不能有多个线程？）</p>
+</li>
+<li><p>JavaScript的单线程，与它的用途有关系。作为浏览器的及脚本语言“JS主要作用是遇用户互动，操作DOM”，这就决定了它只能是单线程的，否则会带来很复杂的同步问题“例如:一个线程在有个DOM节点上添加内容，又在线程上删除这个节点，这时浏览器应该以哪个线程为准？”</p>
+</li>
+<li><p>为了利用多核UPU的计算能力，HTML提出Web Worker标准，允许JavaScript脚本创建多个线程，但是子线程完全受主线程的控制，且不得操作DOM。所以这个新标准并没有改变JavaScript单线程的本质。</p>
+</li>
+</ul>
+<h2 id="2-同步与异步"><a href="#2-同步与异步" class="headerlink" title="2.同步与异步"></a>2.同步与异步</h2><ul>
+<li>单线程就意味着，所有的任务需要排队，前一个任务结束才会执行下一个任务。如果前一个任务耗时很长，后一个任务就等着。</li>
+<li>如果排队是因为计算过大“CPU忙不过来”，就算了。但是很多时候CPU是闲着的，因为IO设备“输入输出设备”很慢“比如AJAX操作从网络读取数据”，不得不等着结果出来再往下执行。</li>
+<li>JavaScript语言的设计者意识到上面的问题，这时候就让主线程完全不管IO设备，把它挂起来“等待中的任务”，先运行后面排队的任务，等到IO设备返回了结果再回过头把挂起来的任务继续执行下去。</li>
+<li>所以，所有的任务可以分成两种，一种是同步任务(synchronous)，另一种是异步任务(Asynchronous)。</li>
+<li><strong>同步</strong>在主线程上排队执行的任务，只有前一个执行完毕，才能执行后一个任务。 按照顺序执行，阻塞的。</li>
+<li><strong>异步</strong>异步任务不进入主线程，而进入“任务队列(task queue)”的任务，只有“任务队列”通知主线程，某个异步任务可以执行了，这个任务才会进入主线程。</li>
+</ul>
+<h3 id="使用异步的场景"><a href="#使用异步的场景" class="headerlink" title="使用异步的场景"></a>使用异步的场景</h3><ol>
+<li>定时任务 ： setTimeout，setInterval</li>
+<li>网络请求 ： ajax请求，动态img添加</li>
+<li>事件绑定 ：点击等交互事件</li>
+</ol>
+<h2 id="3-任务队列"><a href="#3-任务队列" class="headerlink" title="3.任务队列"></a>3.任务队列</h2><h3 id="异步任务运行机制："><a href="#异步任务运行机制：" class="headerlink" title="异步任务运行机制："></a>异步任务运行机制：</h3><ol>
+<li>所有同步任务都在主线程上执行，形成一个执行线。</li>
+<li>主线程之外，还存在一个“任务队列”，只要异步操作执行完成，就到任务队列中排队。</li>
+<li>一旦执行栈中的所有同步任务执行完毕，系统就会按次序读取任务队列中的异步任务，于是被读取的异步任务结束等待状态，进入执行栈，开始执行。</li>
+<li>主线程不断重复上面的第三步。（主线程从任务队列中读取事件，这个过程是循环不断的，所以整个这种运行机制又称为Event Loop“事件循环”）。</li>
+</ol>
+<h2 id="4-事件和回调函数"><a href="#4-事件和回调函数" class="headerlink" title="4.事件和回调函数"></a>4.事件和回调函数</h2><ul>
+<li><strong>任务队列</strong>是一个事件的队列（也可以理解成消息的队列），IO设置完成一项任务就在任务队列中添加一个事件，表示相关的异步任务可以进入到“执行栈”中，主线程读取“任务队列”就是读取里面有哪儿些事件。</li>
+<li><strong>任务队列</strong>中的事件，除了IO设备的时间以外，还包括一些用户产生的事件(比如鼠标单击，页面滚动等)。只要制定过回调函数，这些事件发生时就会进入“任务队列”等待主线程读取。</li>
+<li><strong>回调函数</strong>（callback），就是那些会被主线程挂起来的代码，异步任务必须执行回调函数，当主线程开始执行异步任务，就是执行对应的回调函数。</li>
+<li><strong>任务队列</strong>是一个先进先出的数据结构，排在前面的事件，优先被主线程读取，主线程的读取过程基本上是自动的，只要执行栈已清空，“任务队列”的第一位的时间就自动进入主线程。但是，由于存在后文提到的“定时器”功能，主线程首先要先检查一下执行事件，某些事件只有到了规定的时间才能返回主线程。</li>
+</ul>
+<h2 id="5-Event-Loop"><a href="#5-Event-Loop" class="headerlink" title="5.Event Loop"></a>5.Event Loop</h2><ul>
+<li>主线程从“任务队列”中读取事件，这个过程是循环不断的，所以整个的这种运行机制称为Event Loop “事件循环”。</li>
+</ul>
+<h2 id="6-微任务，宏任务"><a href="#6-微任务，宏任务" class="headerlink" title="6.微任务，宏任务"></a>6.微任务，宏任务</h2><p>在事件中，没进行一次循环操作称为tick。分为宏任务(macrotask) 和微任务(microtask)  并且每次宏任务执行完毕，都要清空所有的微任务。</p>
+<h3 id="宏任务"><a href="#宏任务" class="headerlink" title="宏任务"></a>宏任务</h3><pre><code>setTimeout，setInterval， I/O 。UI交互事件
+</code></pre>
+<h3 id="微任务"><a href="#微任务" class="headerlink" title="微任务"></a>微任务</h3><pre><code>Promise等……
+</code></pre>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="https://lijinshuai21.github.io/LJS_Blog">李金帅</a></p><p> <span>Link:  </span><a href="https://lijinshuai21.github.io/LJS_Blog/2021/06/01/%E8%BF%9B%E7%A8%8B,%E7%BA%BF%E7%A8%8B,%E5%90%8C%E6%AD%A5,%E5%BC%82%E6%AD%A5/">https://lijinshuai21.github.io/LJS_Blog/2021/06/01/%E8%BF%9B%E7%A8%8B,%E7%BA%BF%E7%A8%8B,%E5%90%8C%E6%AD%A5,%E5%BC%82%E6%AD%A5/</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="prevSlogan" href="/LJS_Blog/2021/06/01/%E6%AD%A3%E5%88%99/" title="正则"><span>< PreviousPost</span><br><span class="prevTitle">正则</span></a><a class="nextSlogan" href="/LJS_Blog/2021/04/01/%E5%8E%9F%E5%9E%8B%E5%8F%8A%E5%8E%9F%E5%9E%8B%E9%93%BE/" title="原型与原型链"><span>NextPost ></span><br><span class="nextTitle">原型与原型链</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B-%E7%BA%BF%E7%A8%8B-%E5%90%8C%E6%AD%A5-%E5%BC%82%E6%AD%A5"><span class="toc-number">1.</span> <span class="toc-text">进程 线程 同步 异步</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1.进程与线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%90%8C%E6%AD%A5%E4%B8%8E%E5%BC%82%E6%AD%A5"><span class="toc-number">1.2.</span> <span class="toc-text">2.同步与异步</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%BC%82%E6%AD%A5%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="toc-number">1.2.1.</span> <span class="toc-text">使用异步的场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%BB%BB%E5%8A%A1%E9%98%9F%E5%88%97"><span class="toc-number">1.3.</span> <span class="toc-text">3.任务队列</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%EF%BC%9A"><span class="toc-number">1.3.1.</span> <span class="toc-text">异步任务运行机制：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E4%BA%8B%E4%BB%B6%E5%92%8C%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0"><span class="toc-number">1.4.</span> <span class="toc-text">4.事件和回调函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-Event-Loop"><span class="toc-number">1.5.</span> <span class="toc-text">5.Event Loop</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%BE%AE%E4%BB%BB%E5%8A%A1%EF%BC%8C%E5%AE%8F%E4%BB%BB%E5%8A%A1"><span class="toc-number">1.6.</span> <span class="toc-text">6.微任务，宏任务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8F%E4%BB%BB%E5%8A%A1"><span class="toc-number">1.6.1.</span> <span class="toc-text">宏任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%AE%E4%BB%BB%E5%8A%A1"><span class="toc-number">1.6.2.</span> <span class="toc-text">微任务</span></a></li></ol></li></ol></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>

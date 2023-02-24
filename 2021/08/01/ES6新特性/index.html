@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="李金帅"><meta name="renderer" content="webkit"><meta name="copyright" content="李金帅"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>ES6新特性 · Mr.Li's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/LJS_Blog/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/LJS_Blog/img/assets/portrait.jpg"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">李金帅</div><div class="profile-signature">能将喜欢的东西留在身边，这就是我努力的意义。</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a>Mr.LiJinShuai's Blog</a></div><div class="intro-nav-label-box"><a href="/">首页</a><a href="/about/">关于</a><a href="/archives/">归档</a><a href="/tags/">标签</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">首页</a><a href="/about/">关于</a><a href="/archives/">归档</a><a href="/tags/">标签</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">ES6新特性</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-08</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="ES6"> ES6</a></span></div><div class="post-intro-read"><span> Word count: <span class="post-count">3k</span> | Reading time: <span class="post-count">10</span>min</span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><h1 id="ES6新特性"><a href="#ES6新特性" class="headerlink" title="ES6新特性"></a>ES6新特性</h1><h3 id="1、let、const"><a href="#1、let、const" class="headerlink" title="1、let、const"></a>1、let、const</h3><p><strong>let 特点</strong></p>
+<ol>
+<li>新增块级作用域</li>
+<li>同一作用域不允许重复声明</li>
+<li>不支持变量提升</li>
+<li>for采用let;设置循环变量的那部分是一个父作用域，而循环体内部是一个单独的子作用域</li>
+<li>暂时性死区：在代码块内，使用<code>let</code>命令声明变量之前，该变量都是不可用的</li>
+<li><code>let</code>命令、<code>const</code>命令、<code>class</code>命令声明的全局变量，不属于顶层对象的属性。</li>
+</ol>
+<p><strong>const 特点</strong></p>
+<ol>
+<li>声明时必须赋值</li>
+<li>赋值后，无法修改 </li>
+<li>其余，同let</li>
+</ol>
+<p><strong>注意：对象const的表现。</strong></p>
+<p>综上，定义变量的方式有 六种；</p>
+<ol>
+<li><p>var</p>
+</li>
+<li><p>function</p>
+</li>
+<li><p>let</p>
+</li>
+<li><p>const</p>
+</li>
+<li><p>class</p>
+</li>
+<li><p>import</p>
+</li>
+</ol>
+<p>顶层对象</p>
+<p>JavaScript 语言存在一个顶层对象，它提供全局环境（即全局作用域），所有代码都是在这个环境中运行。但是，顶层对象在各种实现里面是不统一的。</p>
+<ul>
+<li>浏览器里面，顶层对象是<code>window</code>，但 Node 和 Web Worker 没有<code>window</code>。</li>
+<li>浏览器和 Web Worker 里面，<code>self</code>也指向顶层对象，但是 Node 没有<code>self</code>。</li>
+<li>Node 里面，顶层对象是<code>global</code>，但其他环境都不支持。</li>
+</ul>
+<p>同一段代码为了能够在各种环境，都能取到顶层对象，现在一般是使用<code>this</code>变量，但是有局限性。</p>
+<ul>
+<li>全局环境中，<code>this</code>会返回顶层对象。但是，Node.js 模块中<code>this</code>返回的是当前模块，ES6 模块中<code>this</code>返回的是<code>undefined</code>。</li>
+<li>函数里面的<code>this</code>，如果函数不是作为对象的方法运行，而是单纯作为函数运行，<code>this</code>会指向顶层对象。但是，严格模式下，这时<code>this</code>会返回<code>undefined</code>。</li>
+<li>不管是严格模式，还是普通模式，<code>new Function(&#39;return this&#39;)()</code>，总是会返回全局对象。但是，如果浏览器用了 CSP（Content Security Policy，内容安全策略），那么<code>eval</code>、<code>new Function</code>这些方法都可能无法使用。</li>
+</ul>
+<h3 id="2、解构赋值"><a href="#2、解构赋值" class="headerlink" title="2、解构赋值"></a>2、解构赋值</h3><p>解构赋值是基于模式匹配的。 可以设置默认值。</p>
+<ol>
+<li>数组解构赋值</li>
+<li>对象解构赋值</li>
+<li>函数参数解构赋值</li>
+<li>字符串解构赋值</li>
+</ol>
+<p>解构赋值的作用：</p>
+<ol>
+<li><p>交换变量的值</p>
+</li>
+<li><p>函数参数定义</p>
+</li>
+<li><p>函数参数设置默认值</p>
+</li>
+<li><p>从函数返回多个值</p>
+</li>
+<li><p>导入模块的指定方法 </p>
+</li>
+<li><p>从json中提取数据</p>
+</li>
+<li><p>遍历map结构 </p>
+</li>
+</ol>
+<h3 id="3、模板字符串"><a href="#3、模板字符串" class="headerlink" title="3、模板字符串"></a>3、模板字符串</h3><p>${}中是js表达式。</p>
+<h3 id="4、字符串新增方法、数值新增属性、数组新增方法、对象新增方法"><a href="#4、字符串新增方法、数值新增属性、数组新增方法、对象新增方法" class="headerlink" title="4、字符串新增方法、数值新增属性、数组新增方法、对象新增方法"></a>4、字符串新增方法、数值新增属性、数组新增方法、对象新增方法</h3><h3 id="5、函数扩展"><a href="#5、函数扩展" class="headerlink" title="5、函数扩展"></a>5、函数扩展</h3><p>函数的默认参数 ： 函数的length属性，为函数参数的数目，不包含默认参数</p>
+<p>函数的剩余参数：…变量名； 剩余参数后不能再有其他参数</p>
+<p>函数的name属性： 返回函数的名称；</p>
+<p>箭头函数有几个使用注意点：</p>
+<ol>
+<li>函数体内的<code>this</code>对象，就是定义时所在的对象，而不是使用时所在的对象。</li>
+<li>不可以当作构造函数，也就是说，不可以使用<code>new</code>命令，否则会抛出一个错误。</li>
+<li>不可以使用<code>arguments</code>对象，该对象在函数体内不存在。如果要用，可以用 rest 参数代替。</li>
+<li>不可以使用<code>yield</code>命令，因此箭头函数不能用作 Generator 函数。</li>
+<li> 定义对象的方法时，不要使用箭头函数。</li>
+</ol>
+<h3 id="6、扩展运算符"><a href="#6、扩展运算符" class="headerlink" title="6、扩展运算符"></a>6、扩展运算符</h3><p>扩展运算符（spread）是三个点（<code>...</code>）。</p>
+<p>数组\对象复制、数组\对象合并、与解构赋值结合、将字符串转化为字符数组、将实现了 Iterator 接口的对象转化为数组。</p>
+<h3 id="7、对象的扩展"><a href="#7、对象的扩展" class="headerlink" title="7、对象的扩展"></a>7、对象的扩展</h3><p>属性（数据属性、方法属性）的简洁写法、属性名表达式、表达式还可以用于定义方法名。</p>
+<p><strong>注意，简写的对象方法不能用作构造函数，会报错。</strong></p>
+<p><strong>属性的可枚举性</strong></p>
+<p>对象的每个属性都有一个描述对象（Descriptor），用来控制该属性的行为。<code>Object.getOwnPropertyDescriptor</code>方法可以获取该属性的描述对象。</p>
+<p>描述对象的<code>enumerable</code>属性，称为“可枚举性”，如果该属性为<code>false</code>，就表示某些操作会忽略当前属性。</p>
+<p>目前，有四个操作会忽略<code>enumerable</code>为<code>false</code>的属性。</p>
+<ul>
+<li><code>for...in</code>循环：只遍历对象自身的和继承的可枚举的属性。</li>
+<li><code>Object.keys()</code>：返回对象自身的所有可枚举的属性的键名。</li>
+<li><code>JSON.stringify()</code>：只串行化对象自身的可枚举的属性。</li>
+<li><code>Object.assign()</code>： 忽略<code>enumerable</code>为<code>false</code>的属性，只拷贝对象自身的可枚举的属性。</li>
+</ul>
+<p>这四个操作之中，前三个是 ES5 就有的，最后一个<code>Object.assign()</code>是 ES6 新增的。其中，只有<code>for...in</code>会返回继承的属性，其他三个方法都会忽略继承的属性，只处理对象自身的属性。实际上，引入“可枚举”（<code>enumerable</code>）这个概念的最初目的，就是让某些属性可以规避掉<code>for...in</code>操作，不然所有内部属性和方法都会被遍历到。比如，对象原型的<code>toString</code>方法，以及数组的<code>length</code>属性，就通过“可枚举性”，从而避免被<code>for...in</code>遍历到。</p>
+<p><strong>属性的遍历</strong></p>
+<p>ES6 一共有 5 种方法可以遍历对象的属性。</p>
+<p><strong>（1）for…in</strong></p>
+<p><code>for...in</code>循环遍历对象自身的和继承的可枚举属性（不含 Symbol 属性）。</p>
+<p><strong>（2）Object.keys(obj)</strong></p>
+<p><code>Object.keys</code>返回一个数组，包括对象自身的（不含继承的）所有可枚举属性（不含 Symbol 属性）的键名。</p>
+<p><strong>（3）Object.getOwnPropertyNames(obj)</strong></p>
+<p><code>Object.getOwnPropertyNames</code>返回一个数组，包含对象自身的所有属性（不含 Symbol 属性，但是包括不可枚举属性）的键名。</p>
+<p><strong>（4）Object.getOwnPropertySymbols(obj)</strong></p>
+<p><code>Object.getOwnPropertySymbols</code>返回一个数组，包含对象自身的所有 Symbol 属性的键名。</p>
+<p><strong>（5）Reflect.ownKeys(obj)</strong></p>
+<p><code>Reflect.ownKeys</code>返回一个数组，包含对象自身的（不含继承的）所有键名，不管键名是 Symbol 或字符串，也不管是否可枚举。</p>
+<p>以上的 5 种方法遍历对象的键名，都遵守同样的属性遍历的次序规则。</p>
+<ul>
+<li>首先遍历所有数值键，按照数值升序排列。</li>
+<li>其次遍历所有字符串键，按照加入时间升序排列。</li>
+<li>最后遍历所有 Symbol 键，按照加入时间升序排列。</li>
+</ul>
+<p><strong><code>this</code>关键字总是指向函数所在的当前对象，ES6 又新增了另一个类似的关键字<code>super</code>，指向当前对象的原型对象。</strong></p>
+<p><strong>链判断运算符</strong></p>
+<p>编程实务中，如果读取对象内部的某个属性，往往需要判断一下该对象是否存在。比如，要读取<code>message.body.user.firstName</code>，安全的写法是写成下面这样。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 错误的写法</span></span><br><span class="line"><span class="keyword">const</span>  firstName = message.<span class="property">body</span>.<span class="property">user</span>.<span class="property">firstName</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 正确的写法</span></span><br><span class="line"><span class="keyword">const</span> firstName = (message</span><br><span class="line">  &amp;&amp; message.<span class="property">body</span></span><br><span class="line">  &amp;&amp; message.<span class="property">body</span>.<span class="property">user</span></span><br><span class="line">  &amp;&amp; message.<span class="property">body</span>.<span class="property">user</span>.<span class="property">firstName</span>) || <span class="string">&#x27;default&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上面例子中，<code>firstName</code>属性在对象的第四层，所以需要判断四次，每一层是否有值。</p>
+<p>三元运算符<code>?:</code>也常用于判断对象是否存在。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fooInput = myForm.<span class="title function_">querySelector</span>(<span class="string">&#x27;input[name=foo]&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> fooValue = fooInput ? fooInput.<span class="property">value</span> : <span class="literal">undefined</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>这样的层层判断非常麻烦，因此 ES2020引入了“链判断运算符”（optional chaining operator）<code>?.</code>，简化上面的写法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> firstName = message?.<span class="property">body</span>?.<span class="property">user</span>?.<span class="property">firstName</span> || <span class="string">&#x27;default&#x27;</span>;</span><br><span class="line"><span class="keyword">const</span> fooValue = myForm.<span class="title function_">querySelector</span>(<span class="string">&#x27;input[name=foo]&#x27;</span>)?.<span class="property">value</span></span><br></pre></td></tr></table></figure>
+
+<p>下面是判断对象方法是否存在，如果存在就立即执行的例子。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iterator.<span class="property">return</span>?.()</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="8、Symbol类型"><a href="#8、Symbol类型" class="headerlink" title="8、Symbol类型"></a>8、Symbol类型</h3><p>ES5 的对象属性名都是字符串，这容易造成属性名的冲突。</p>
+<p>比如，你使用了一个他人提供的对象，但又想为这个对象添加新的方法（mixin 模式），新方法的名字就有可能与现有方法产生冲突。如果有一种机制，保证每个属性的名字都是独一无二的就好了，这样就从根本上防止属性名的冲突。这就是 ES6 引入<code>Symbol</code>的原因。</p>
+<p>ES6 引入了一种新的原始数据类型<code>Symbol</code>，表示独一无二的值。它是 JavaScript 语言的第七种数据类型，前六种是：<code>undefined</code>、<code>null</code>、布尔值（Boolean）、字符串（String）、数值（Number）、对象（Object）。</p>
+<p>Symbol 值通过<code>Symbol</code>函数生成。这就是说，<strong>对象的属性名现在可以有两种类型，一种是原来就有的字符串，另一种就是新增的 Symbol 类型。凡是属性名属于 Symbol 类型，就都是独一无二的，可以保证不会与其他属性名产生冲突。</strong></p>
+<p>Symbol 作为属性名，遍历对象的时候，该属性不会出现在<code>for...in</code>、<code>for...of</code>循环中，也不会被<code>Object.keys()</code>、<code>Object.getOwnPropertyNames()</code>、<code>JSON.stringify()</code>返回。</p>
+<p>但是，它也不是私有属性，有一个<code>Object.getOwnPropertySymbols()</code>方法，可以获取指定对象的所有 Symbol 属性名。该方法返回一个数组，成员是当前对象的所有用作属性名的 Symbol 值。</p>
+<p>内置的 Symbol 值：除了定义自己使用的 Symbol 值以外，ES6 还提供了 11 个内置的 Symbol 值，指向语言内部使用的方法。</p>
+<p><strong>Symbol.hasInstance</strong></p>
+<p>对象的<code>Symbol.hasInstance</code>属性，指向一个内部方法。当其他对象使用<code>instanceof</code>运算符，判断是否为该对象的实例时，会调用这个方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Even</span> &#123;</span><br><span class="line">  <span class="keyword">static</span> [<span class="title class_">Symbol</span>.<span class="property">hasInstance</span>](obj) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Number</span>(obj) % <span class="number">2</span> === <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等同于</span></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Even</span> = &#123;</span><br><span class="line">  [<span class="title class_">Symbol</span>.<span class="property">hasInstance</span>](obj) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Number</span>(obj) % <span class="number">2</span> === <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="number">1</span> <span class="keyword">instanceof</span> <span class="title class_">Even</span> <span class="comment">// false</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">instanceof</span> <span class="title class_">Even</span> <span class="comment">// true</span></span><br><span class="line"><span class="number">12345</span> <span class="keyword">instanceof</span> <span class="title class_">Even</span> <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="9、遍历器-和-for-of"><a href="#9、遍历器-和-for-of" class="headerlink" title="9、遍历器 和 for-of"></a>9、遍历器 和 for-of</h3><p>ES6 借鉴 C++、Java、C# 和 Python 语言，引入了<code>for...of</code>循环，作为遍历所有数据结构的统一的方法。</p>
+<p>一个数据结构只要部署了<code>Symbol.iterator</code>属性，就被视为具有 iterator 接口，就可以用<code>for...of</code>循环遍历它的成员。也就是说，<code>for...of</code>循环内部调用的是数据结构的<code>Symbol.iterator</code>方法。</p>
+<p><code>for...of</code>循环可以使用的范围包括数组、Set 和 Map 结构、某些类似数组的对象（比如<code>arguments</code>对象、DOM NodeList 对象）、后文的 Generator 对象，以及字符串。</p>
+<p>JavaScript 原有的表示“集合”的数据结构，主要是数组（<code>Array</code>）和对象（<code>Object</code>），ES6 又添加了<code>Map</code>和<code>Set</code>。这样就有了四种数据集合，用户还可以组合使用它们，定义自己的数据结构，比如数组的成员是<code>Map</code>，<code>Map</code>的成员是对象。这样就需要一种统一的接口机制，来处理所有不同的数据结构。</p>
+<p>遍历器（Iterator）就是这样一种机制。它是一种接口，为各种不同的数据结构提供统一的访问机制。任何数据结构只要部署 Iterator 接口，就可以完成遍历操作（即依次处理该数据结构的所有成员）。</p>
+<p>Iterator 的作用有三个：一是为各种数据结构，提供一个统一的、简便的访问接口；二是使得数据结构的成员能够按某种次序排列；三是 ES6 创造了一种新的遍历命令<code>for...of</code>循环，Iterator 接口主要供<code>for...of</code>消费。</p>
+<p>Iterator 的遍历过程是这样的。</p>
+<p>（1）创建一个指针对象，指向当前数据结构的起始位置。也就是说，遍历器对象本质上，就是一个指针对象。</p>
+<p>（2）第一次调用指针对象的<code>next</code>方法，可以将指针指向数据结构的第一个成员。</p>
+<p>（3）第二次调用指针对象的<code>next</code>方法，指针就指向数据结构的第二个成员。</p>
+<p>（4）不断调用指针对象的<code>next</code>方法，直到它指向数据结构的结束位置。</p>
+<p>每一次调用<code>next</code>方法，都会返回数据结构的当前成员的信息。具体来说，就是返回一个包含<code>value</code>和<code>done</code>两个属性的对象。其中，<code>value</code>属性是当前成员的值，<code>done</code>属性是一个布尔值，表示遍历是否结束。</p>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="https://lijinshuai21.github.io/LJS_Blog">李金帅</a></p><p> <span>Link:  </span><a href="https://lijinshuai21.github.io/LJS_Blog/2021/08/01/ES6%E6%96%B0%E7%89%B9%E6%80%A7/">https://lijinshuai21.github.io/LJS_Blog/2021/08/01/ES6%E6%96%B0%E7%89%B9%E6%80%A7/</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="prevSlogan" href="/LJS_Blog/2021/09/01/webStorage/" title="webStorage存储数据"><span>< PreviousPost</span><br><span class="prevTitle">webStorage存储数据</span></a><a class="nextSlogan" href="/LJS_Blog/2021/08/01/event/" title="event对象"><span>NextPost ></span><br><span class="nextTitle">event对象</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ES6%E6%96%B0%E7%89%B9%E6%80%A7"><span class="toc-number">1.</span> <span class="toc-text">ES6新特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81let%E3%80%81const"><span class="toc-number">1.0.1.</span> <span class="toc-text">1、let、const</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC"><span class="toc-number">1.0.2.</span> <span class="toc-text">2、解构赋值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81%E6%A8%A1%E6%9D%BF%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">1.0.3.</span> <span class="toc-text">3、模板字符串</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%96%B0%E5%A2%9E%E6%96%B9%E6%B3%95%E3%80%81%E6%95%B0%E5%80%BC%E6%96%B0%E5%A2%9E%E5%B1%9E%E6%80%A7%E3%80%81%E6%95%B0%E7%BB%84%E6%96%B0%E5%A2%9E%E6%96%B9%E6%B3%95%E3%80%81%E5%AF%B9%E8%B1%A1%E6%96%B0%E5%A2%9E%E6%96%B9%E6%B3%95"><span class="toc-number">1.0.4.</span> <span class="toc-text">4、字符串新增方法、数值新增属性、数组新增方法、对象新增方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5%E3%80%81%E5%87%BD%E6%95%B0%E6%89%A9%E5%B1%95"><span class="toc-number">1.0.5.</span> <span class="toc-text">5、函数扩展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6%E3%80%81%E6%89%A9%E5%B1%95%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">1.0.6.</span> <span class="toc-text">6、扩展运算符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7%E3%80%81%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%89%A9%E5%B1%95"><span class="toc-number">1.0.7.</span> <span class="toc-text">7、对象的扩展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8%E3%80%81Symbol%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.0.8.</span> <span class="toc-text">8、Symbol类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9%E3%80%81%E9%81%8D%E5%8E%86%E5%99%A8-%E5%92%8C-for-of"><span class="toc-number">1.0.9.</span> <span class="toc-text">9、遍历器 和 for-of</span></a></li></ol></li></ol></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>

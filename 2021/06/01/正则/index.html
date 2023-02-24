@@ -1,0 +1,109 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="李金帅"><meta name="renderer" content="webkit"><meta name="copyright" content="李金帅"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>正则 · Mr.Li's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/LJS_Blog/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.2"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/LJS_Blog/img/assets/portrait.jpg"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">李金帅</div><div class="profile-signature">能将喜欢的东西留在身边，这就是我努力的意义。</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a>Mr.LiJinShuai's Blog</a></div><div class="intro-nav-label-box"><a href="/">首页</a><a href="/about/">关于</a><a href="/archives/">归档</a><a href="/tags/">标签</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">首页</a><a href="/about/">关于</a><a href="/archives/">归档</a><a href="/tags/">标签</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">正则</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-06</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="JS"> JS</a></span></div><div class="post-intro-read"><span> Word count: <span class="post-count">727</span> | Reading time: <span class="post-count">2</span>min</span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><h2 id="1-什么是正则表达式？"><a href="#1-什么是正则表达式？" class="headerlink" title="1. 什么是正则表达式？"></a>1. 什么是正则表达式？</h2><p>正则表达式(Regular Expression)是一种文本模式，包括普通字符（如，a-z,A-Z,0-9等）和特殊字符（称为”元字符”，如：+,?,*等）。<br>正则表达式使用单个字符串来描述、匹配一系列匹配某个句法规则的字符串。<br>正则表达式是繁琐的，但它是强大的，学会之后的应用会让你除了提高效率外，会给你带来绝对的成就感。<br>许多程序设计语言都支持利用正则表达式进行字符串操作。C#， java, PHP</p>
+<p>正则表达式使用场景：一般校验字符串是否满足正则表达式条件，如：登录校验，注册校验，验证邮箱，验证手机，验证密码强度等等。</p>
+<h2 id="2-JS中如何定义正则表达式？"><a href="#2-JS中如何定义正则表达式？" class="headerlink" title="2. JS中如何定义正则表达式？"></a>2. JS中如何定义正则表达式？</h2><p>两种方式：字面量和RegExp()对象<br>如：<br>var reg1 = /[0-9]/;     // 字面量定义方式，推荐使用<br>var reg2 = new RegExp(‘[0-9]’, ‘i’); </p>
+<p>RegExp对象及其API参考：<br><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp">https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp</a></p>
+<h2 id="3-正则表达式语法？（重点）"><a href="#3-正则表达式语法？（重点）" class="headerlink" title="3. 正则表达式语法？（重点）"></a>3. 正则表达式语法？（重点）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[0-9]匹配0-9之间的单个数字，其中[]表示范围</span><br><span class="line">[a-z]匹配a-z之间的单个字母</span><br><span class="line">[A-Z]匹配A-Z之间的单个字母</span><br><span class="line">+ 匹配1个或多个字符（1次或多次）</span><br><span class="line">? 匹配0个或一个字符（0次、或1次）</span><br><span class="line">* 匹配0个或多个字符（0次、或1次、或多次）</span><br><span class="line">^ 匹配以xxx字符开头，特别注意在[]中使用时表示取反操作。</span><br><span class="line">$ 匹配以xxx字符结尾</span><br><span class="line">&#123;&#125; 表示匹配的字符串的长度范围 &#123;2, 6&#125;  相当:str.length &gt;= 2 &amp;&amp; str.length &lt;= 6</span><br><span class="line">() 表示一个整体.</span><br><span class="line">| 表示或者 or </span><br><span class="line"></span><br><span class="line">\s 匹配任何空白字符 &#x27;&#x27;，包括空格(按下空格键)、制表符、换页符等等。等价于 [\f\n\r\t\v]。</span><br><span class="line">\S 匹配任何非空白字符。等价于 [^\f\n\r\t\v]</span><br><span class="line">\w 匹配数字,字母,下划线</span><br><span class="line">\W 匹配非数字,非字母,非下划线</span><br><span class="line">\d	匹配一个数字字符。等价于 [0-9]。</span><br><span class="line">\D	匹配一个非数字字符。等价于 [^0-9]。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">以下的了解：</span><br><span class="line">\ 转义字符  如：\. </span><br><span class="line">\f 匹配一个换页符(了解)  PageDown下一页 PageUp上一页</span><br><span class="line">\n 匹配一个换行符 (软换行,自动换行,常用)</span><br><span class="line">\r 匹配一个回车符 (强换行,相当于按下enter键,常用)</span><br><span class="line">\t 匹配一个制表符。(了解,相当于按下tab键)</span><br><span class="line">\v 匹配一个垂直制表符。(了解)</span><br><span class="line">......</span><br><span class="line">各种语法可以组合使用。</span><br></pre></td></tr></table></figure>
+<p>详细语法参考文档：<br><a target="_blank" rel="noopener" href="https://www.runoob.com/regexp/regexp-syntax.html">https://www.runoob.com/regexp/regexp-syntax.html</a></p>
+<h2 id="4-正则表达式的三种模式？（了解）"><a href="#4-正则表达式的三种模式？（了解）" class="headerlink" title="4. 正则表达式的三种模式？（了解）"></a>4. 正则表达式的三种模式？（了解）</h2><p>贪婪模式  * 和 +、懒惰模式  ?、独占模式</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/study-everyday/p/7426862.html">https://www.cnblogs.com/study-everyday/p/7426862.html</a></p>
+<h2 id="5-常用的正则表达式"><a href="#5-常用的正则表达式" class="headerlink" title="5. 常用的正则表达式"></a>5. 常用的正则表达式</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/ZYC88888/article/details/98479629">https://blog.csdn.net/ZYC88888/article/details/98479629</a><br><a target="_blank" rel="noopener" href="http://c.runoob.com/front-end/854">http://c.runoob.com/front-end/854</a></p>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="https://lijinshuai21.github.io/LJS_Blog">李金帅</a></p><p> <span>Link:  </span><a href="https://lijinshuai21.github.io/LJS_Blog/2021/06/01/%E6%AD%A3%E5%88%99/">https://lijinshuai21.github.io/LJS_Blog/2021/06/01/%E6%AD%A3%E5%88%99/</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="prevSlogan" href="/LJS_Blog/2021/06/01/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E8%BF%90%E7%AE%97/" title="数据类型转换"><span>< PreviousPost</span><br><span class="prevTitle">数据类型转换</span></a><a class="nextSlogan" href="/LJS_Blog/2021/06/01/%E8%BF%9B%E7%A8%8B,%E7%BA%BF%E7%A8%8B,%E5%90%8C%E6%AD%A5,%E5%BC%82%E6%AD%A5/" title="进程 线程 同步 异步"><span>NextPost ></span><br><span class="nextTitle">进程 线程 同步 异步</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">1. 什么是正则表达式？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-JS%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">2. JS中如何定义正则表达式？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%AF%AD%E6%B3%95%EF%BC%9F%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">3. 正则表达式语法？（重点）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E4%B8%89%E7%A7%8D%E6%A8%A1%E5%BC%8F%EF%BC%9F%EF%BC%88%E4%BA%86%E8%A7%A3%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">4. 正则表达式的三种模式？（了解）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%B8%B8%E7%94%A8%E7%9A%84%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">5.</span> <span class="toc-text">5. 常用的正则表达式</span></a></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>
